@@ -18,7 +18,7 @@ def zip_day(in_path, out_path):
 
 
 def tarzst_day(in_path, out_path):
-    cctx = zstd.ZstdCompressor(level=14)
+    cctx = zstd.ZstdCompressor(level=14, write_checksum=True)
     with out_path.open("wb") as of:
         with cctx.stream_writer(of) as zstd_writer:
             with tarfile.open(mode="w|", fileobj=zstd_writer) as tf:
@@ -28,14 +28,24 @@ def tarzst_day(in_path, out_path):
                     tf.add(str(p), arcname=p.name)
 
 
-def archive_day(data_path, archive_path, day, make_zip, make_tar_zst):
+def archive_day(data_path, archive_path, day, make_zip, make_tar_zst, force=False):
     in_path = data_path / day
     if make_zip:
         zip_path = archive_path / "{}.zip".format(day)
-        zip_day(in_path, zip_path)
+        if force or not zip_path.exists():
+            zip_day(in_path, zip_path)
     if make_tar_zst:
         tarzst_path = archive_path / "{}.tar.zst".format(day)
-        tarzst_day(in_path, tarzst_path)
+        if force or not tarzst_path.exists():
+            tarzst_day(in_path, tarzst_path)
+
+
+def archive_days(data_path, archive_path, make_zip, make_tar_zst, force):
+    today = datetime.now().strftime("%Y%m%d")
+    for day in sorted([d for d in data_path.iterdir() if d.is_dir()]):
+        if day.name == today:
+            continue
+        archive_day(data_path, archive_path, day.name, make_zip, make_tar_zst, force)
 
 
 @click.command()
@@ -52,12 +62,6 @@ def archive_day(data_path, archive_path, day, make_zip, make_tar_zst):
     help="output path",
 )
 @click.option(
-    "--day",
-    default=lambda: (datetime.now() - timedelta(days=1)).strftime("%Y%m%d"),
-    show_default="yesterday",
-    help="day in YYYYmmdd format",
-)
-@click.option(
     "--zip/--no-zip",
     default=False,
     show_default=True,
@@ -69,11 +73,12 @@ def archive_day(data_path, archive_path, day, make_zip, make_tar_zst):
     show_default=True,
     help="create a .tar.zst archive per day",
 )
-def main(data_dir, archive_dir, day, zip, tar_zst):
+@click.option("-f", "--force", is_flag=True, help="override existing archives")
+def main(data_dir, archive_dir, zip, tar_zst, force):
     data_path = Path(data_dir)
     archive_path = Path(archive_dir)
     archive_path.mkdir(parents=True, exist_ok=True)
-    archive_day(data_path, archive_path, day, zip, tar_zst)
+    archive_days(data_path, archive_path, zip, tar_zst, force)
 
 
 if __name__ == "__main__":
