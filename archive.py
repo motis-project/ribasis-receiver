@@ -14,7 +14,7 @@ from tqdm import tqdm
 def zip_day(in_path, out_path):
     with zipfile.ZipFile(str(out_path), "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for p in tqdm(sorted(in_path.glob("*.json")), desc=out_path.name, disable=None):
-            zf.write(str(p))
+            zf.write(str(p), arcname=p.name)
 
 
 def tarzst_day(in_path, out_path):
