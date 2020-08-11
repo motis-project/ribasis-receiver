@@ -1,0 +1,13 @@
+[Unit]
+Description=RI Basis Receiver
+After=network.target
+#StartLimitIntervalSec=0
+
+[Service]
+Restart=always
+ExecStart=/root/ribasis/rib-receiver/venv/bin/python /root/ribasis/rib-receiver/rib-receiver.py
+WorkingDirectory=/root/ribasis/rib-receiver
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
