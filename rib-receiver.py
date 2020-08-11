@@ -2,6 +2,7 @@
 import os
 import ssl
 import json
+import logging
 from pathlib import Path
 from datetime import datetime
 
@@ -63,8 +64,13 @@ def main():
         channel.start_consuming()
     except KeyboardInterrupt:
         channel.stop_consuming()
-    connection.close()
+    finally:
+        try:
+            connection.close()
+        except:
+            pass
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     main()
