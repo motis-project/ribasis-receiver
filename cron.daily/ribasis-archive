@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /root/ribasis/rib-receiver
+/root/ribasis/rib-receiver/venv/bin/python /root/ribasis/rib-receiver/archive.py
