@@ -7,6 +7,7 @@ After=network.target
 Restart=always
 ExecStart=/root/ribasis/rib-receiver/venv/bin/python /root/ribasis/rib-receiver/rib-receiver.py
 WorkingDirectory=/root/ribasis/rib-receiver
+RestartSec=10
 StartLimitInterval=0
 
 [Install]
