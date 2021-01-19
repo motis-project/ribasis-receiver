@@ -8,6 +8,7 @@ from datetime import datetime
 
 import dotenv
 import pika
+import requests
 
 
 dotenv.load_dotenv()
@@ -18,9 +19,19 @@ HOST = os.getenv("HOST")
 VIRTUAL_HOST = os.getenv("VIRTUAL_HOST")
 USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
-PORT = int(os.getenv("PORT", "5671"))
+PORT = int(os.getenv("PORT", "5672"))
 QUEUE = os.getenv("QUEUE")
 DATA_DIR = Path(os.getenv("DATA_DIR"))
+MOTIS_NOTIFY_URL = os.getenv("MOTIS_NOTIFY_URL")
+
+
+def notify_motis():
+    if not MOTIS_NOTIFY_URL:
+        return
+    try:
+        requests.get(MOTIS_NOTIFY_URL, timeout=10)
+    except Exception as e:
+        print("MOTIS call failed: {}".format(e))
 
 
 def on_message(channel, method_frame, header_frame, body):
@@ -42,12 +53,14 @@ def on_message(channel, method_frame, header_frame, body):
     channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
     print("{:13} {:36} {:32}".format(msg_sequence, msg_id, j["meta"]["created"]))
-
+    notify_motis()
 
 def main():
-    ssl_ctx = ssl.create_default_context(cafile=CA_FILE)
-    ssl_ctx.load_cert_chain(CLIENT_CERT_FILE)
-    ssl_options = pika.SSLOptions(ssl_ctx, HOST)
+    ssl_options = None
+    if CA_FILE:
+        ssl_ctx = ssl.create_default_context(cafile=CA_FILE)
+        ssl_ctx.load_cert_chain(CLIENT_CERT_FILE)
+        ssl_options = pika.SSLOptions(ssl_ctx, HOST)
     credentials = pika.PlainCredentials(USERNAME, PASSWORD)
     conn_params = pika.ConnectionParameters(
         host=HOST,

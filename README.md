@@ -2,6 +2,8 @@
 
 Empfängt RI Basis Daten via AMQP (RabbitMQ) und speichert sie als JSON-Dateien, eine Datei pro Meldung.
 
+Optional kann nach dem Empfang jeder Nachricht eine `/ris/read`-Anfrage an eine MOTIS-Instanz geschickt werden (nicht für hohes Nachrichtenaufkommen geeignet).
+
 ## Konfiguration
 
 Über Umgebungsvariablen (werden auch aus einer `.env`-Datei geladen falls vorhanden):
@@ -15,8 +17,24 @@ USERNAME="..."
 PASSWORD="..."
 PORT=5671
 QUEUE="..."
+
 DATA_DIR="/root/ribasis/data"
 ARCHIVE_DIR="/root/ribasis/archive"
+
+Beispiel-Konfiguration für lokale RabbitMQ-Instanz:
+
+```shell
+HOST="localhost"
+PORT=5672
+VIRTUAL_HOST="/"
+USERNAME="guest"
+PASSWORD="guest"
+QUEUE="ribasis"
+
+DATA_DIR="/root/ribasis/data"
+ARCHIVE_DIR="/root/ribasis/archive"
+
+MOTIS_NOTIFY_URL="http://localhost:8080/ris/read"
 ```
 
 ## Ausgabedateien
