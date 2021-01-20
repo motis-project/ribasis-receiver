@@ -20,6 +20,7 @@ QUEUE="..."
 
 DATA_DIR="/root/ribasis/data"
 ARCHIVE_DIR="/root/ribasis/archive"
+```
 
 Beispiel-Konfiguration für lokale RabbitMQ-Instanz:
 
